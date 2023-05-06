@@ -14,6 +14,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -42,11 +49,24 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> update (@RequestBody Product productDetails, @PathVariable  int id){
+    public ResponseEntity<?> update (@RequestBody Product productDetails, @PathVariable  int id) throws ParseException {
         Optional<Product> product = productService.findById(id);
+
+        Date date = new Date();
+        Date date1 = product.get().getLastUpdate();
+
+        long differenceInMillis = date.getTime() - date1.getTime();
+
+        long hours=(differenceInMillis/3600000);
 
         if(!product.isPresent()){
             return ResponseEntity.notFound().build();
+        }
+
+
+        if(product.get().getStock()<5&&hours<24){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("The product is locked");
+
         }
 
         product.get().setName(productDetails.getName());
@@ -68,7 +88,6 @@ public class ProductController {
         return ResponseEntity.ok().build();
     }
 
-    //Streams
 
     @GetMapping
     public List<Product> readAll(){

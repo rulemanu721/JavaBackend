@@ -1,6 +1,8 @@
 package com.backend.Java.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
@@ -15,6 +17,8 @@ public class Product implements Serializable {
     @Column(name="product_id")
     private int id;
 
+
+
     @Column(name="name")
     private String name;
 
@@ -27,6 +31,8 @@ public class Product implements Serializable {
     @Column(name="price")
     private float price;
 
+    @UpdateTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
     @DateTimeFormat(pattern="dd-M-yyyy hh:mm:ss")
     @Column(name="last_update")
     private Date lastUpdate;
