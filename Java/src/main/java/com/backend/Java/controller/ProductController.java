@@ -5,21 +5,8 @@ import com.backend.Java.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.bind.annotation.*;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -34,39 +21,36 @@ public class ProductController {
     private ProductService productService;
 
     @PostMapping
-    public ResponseEntity<?> create (@RequestBody Product product){
+    public ResponseEntity<?> create(@RequestBody Product product) {
         return ResponseEntity.status(HttpStatus.CREATED).body(productService.save(product));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> read (@PathVariable int id){
+    public ResponseEntity<?> read(@PathVariable int id) {
         Optional<Product> optionalProduct = productService.findById(id);
 
-        if(!optionalProduct.isPresent()){
+        if (!optionalProduct.isPresent()) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(optionalProduct);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> update (@RequestBody Product productDetails, @PathVariable  int id) throws ParseException {
+    public ResponseEntity<?> update(@RequestBody Product productDetails, @PathVariable int id) throws ParseException {
         Optional<Product> product = productService.findById(id);
 
         Date date = new Date();
         Date date1 = product.get().getLastUpdate();
 
         long differenceInMillis = date.getTime() - date1.getTime();
+        long hours = (differenceInMillis / 3600000);
 
-        long hours=(differenceInMillis/3600000);
-
-        if(!product.isPresent()){
+        if (!product.isPresent()) {
             return ResponseEntity.notFound().build();
         }
 
-
-        if(product.get().getStock()<5&&hours<24){
+        if (product.get().getStock() < 5 && hours < 24) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("The product is locked");
-
         }
 
         product.get().setName(productDetails.getName());
@@ -79,9 +63,8 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete (@PathVariable int id){
-        //Check put
-        if(!productService.findById(id).isPresent()){
+    public ResponseEntity<?> delete(@PathVariable int id) {
+        if (!productService.findById(id).isPresent()) {
             return ResponseEntity.notFound().build();
         }
         productService.deleteById(id);
@@ -90,14 +73,12 @@ public class ProductController {
 
 
     @GetMapping
-    public List<Product> readAll(){
+    public List<Product> readAll() {
         List<Product> products = StreamSupport
-                .stream(productService.findAll().spliterator(),false)
+                .stream(productService.findAll().spliterator(), false)
                 .collect(Collectors.toList());
 
         return products;
     }
-
-
 
 }
